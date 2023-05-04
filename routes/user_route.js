@@ -7,6 +7,7 @@ const User = require("../service/user_service")
 router.post("/",User.createUser);
 router.post("/login",User.login);
 router.put("/:id",User.updateUser);
+router.get("/",User.getAllUser)
 
 
 module.exports = router;

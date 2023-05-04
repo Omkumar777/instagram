@@ -3,14 +3,15 @@
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
+require('dotenv').config();
 module.exports = {
 
   development: {
     client: 'mysql',
     connection: {
-      database: 'instagram',
-      user:     'root',
-      password: 'omkumar1'
+      database: process.env.database,
+      user:     process.env.user,
+      password: process.env.password
     }
   },
 

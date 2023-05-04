@@ -80,6 +80,14 @@ const login = async (req, res) => {
         res.status(500).json(format(null,500,error));
     }
 }
+const getAllUser =async(req,res)=>{
+    try {
+        const data = await User.query();
+        res.status(200).json(format(data))
+    } catch (error) {
+        res.status(500).json(format(null,500,error))
+    }
+}
 
 const updateUser = async(req,res)=>{
     try {
@@ -99,5 +107,5 @@ const updateUser = async(req,res)=>{
 }
 
 module.exports = {
-    createUser,login,updateUser
+    createUser,login,updateUser,getAllUser
 }
