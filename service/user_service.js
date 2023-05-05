@@ -4,7 +4,8 @@ const jwt = require("jsonwebtoken");
 const joi = require("joi");
 require('dotenv').config();
 const nodemailer = require('nodemailer');
-const otp = require('generate-password')
+const otp = require('generate-password');
+const { default: knex } = require("knex");
 
 
 
@@ -88,6 +89,14 @@ const getAllUser =async(req,res)=>{
         res.status(500).json(format(null,500,error))
     }
 }
+const searchUsers =async(req,res)=>{
+    try {
+        const data = await User.query().where( 'username' , 'like', req.body.search);
+        res.status(200).json(format(data))
+    } catch (error) {
+        res.status(500).json(format(null,500,error))
+    }
+}
 
 const updateUser = async(req,res)=>{
     try {
@@ -96,6 +105,7 @@ const updateUser = async(req,res)=>{
             symbols : false,
             uppercase: true
         })
+        req.body.updated_at = new Date;
         const user = await User.query().findById(Number(req.params.id)).update(req.body);
         sendmail(req.body.email,otp1);
         res.status(200).json(format(user));
@@ -107,5 +117,5 @@ const updateUser = async(req,res)=>{
 }
 
 module.exports = {
-    createUser,login,updateUser,getAllUser
+    createUser,login,updateUser,getAllUser,searchUsers
 }

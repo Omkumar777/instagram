@@ -12,8 +12,8 @@ exports.up = function(knex) {
     table.bigInteger("phoneNumber",10);
     table.boolean('type').defaultTo(true);
     table.string("role").defaultTo("user");
-    table.timestamp("created at").defaultTo(knex.fn.now());
-    table.timestamp("updated at").defaultTo(knex.fn.now());
+    table.timestamp("created_at").defaultTo(knex.fn.now());
+    table.timestamp("updated_at").defaultTo(knex.fn.now());
     })
 };
 
