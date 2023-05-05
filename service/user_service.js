@@ -34,28 +34,28 @@ function sendmail(toMail, otp) {
 }
 
 
-function format(data,status=200,message='ok'){
-    return {status , message ,data}
+function format(data, status = 200, message = 'ok') {
+    return { status, message, data }
 }
 
-const createUser = async(req,res)=>{
+const createUser = async (req, res) => {
 
-   try {
-    const otp1 = otp.generate({
-        length: 6,
-        symbols : false,
-        uppercase: true
-    })
+    try {
+        const otp1 = otp.generate({
+            length: 6,
+            symbols: false,
+            uppercase: true
+        })
 
-    const pass=await bcrypt.hash(req.body.password , 7);
-    req.body.password = pass;
-    
-    const data = await User.query().insert(req.body);
-    sendmail(req.body.email,otp1);
-    res.status(200).json(format(data));
-   } catch (error) {
-    res.status(500).json(format(null,500,error));
-   }
+        const pass = await bcrypt.hash(req.body.password, 7);
+        req.body.password = pass;
+
+        const data = await User.query().insert(req.body);
+        sendmail(req.body.email, otp1);
+        res.status(200).json(format(data));
+    } catch (error) {
+        res.status(500).json(format(null, 500, error));
+    }
 }
 
 const login = async (req, res) => {
@@ -68,9 +68,7 @@ const login = async (req, res) => {
     }
     try {
         const result = validate(req.body);
-        
         if (!result.error) {
-            
             const access_token = jwt.sign(req.body, process.env.TOKEN);
             res.json(format(access_token))
         }
@@ -78,44 +76,71 @@ const login = async (req, res) => {
             res.status(404).json(format(null, 404, result.error.details))
         }
     } catch (error) {
-        res.status(500).json(format(null,500,error));
+        res.status(500).json(format(null, 500, error));
     }
 }
-const getAllUser =async(req,res)=>{
+
+const adminAuthenticate = async (req, res,next) => {
+    try {
+        const token = req.headers['authorization'];
+        if (!token) return res.status(401).json(format(null, 401, 'Not Authorized'));
+
+        jwt.verify(token, process.env.TOKEN, async (err, user) => {
+            if (err) {
+                return res.status(403).json(format(null, 403, err));
+            }
+            const data = await User.query().findOne({ username: user.username })
+
+
+            if (data == null ) return res.status(404).json(format(null, 404, "Username is wrong "))
+
+            const checkPass = await bcrypt.compare(user.password, data.password)
+            if (!checkPass) return res.status(404).json(format(null, 404, "Password is wrong "))
+            
+            if(!(data.role =="admin")) return res.status(404).json(format(null, 404, "you are not admin "))
+          
+            next();
+        })
+    } catch (error) {
+        res.status(500).json(format(null, 500, error));
+    }
+}
+
+const getAllUser = async (req, res) => {
     try {
         const data = await User.query();
         res.status(200).json(format(data))
     } catch (error) {
-        res.status(500).json(format(null,500,error))
+        res.status(500).json(format(null, 500, error))
     }
 }
-const searchUsers =async(req,res)=>{
+const searchUsers = async (req, res) => {
     try {
-        const data = await User.query().where( 'username' , 'like', req.body.search);
+        const data = await User.query().where('username', req.body.search);
         res.status(200).json(format(data))
     } catch (error) {
-        res.status(500).json(format(null,500,error))
+        res.status(500).json(format(null, 500, error))
     }
 }
 
-const updateUser = async(req,res)=>{
+const updateUser = async (req, res) => {
     try {
         const otp1 = otp.generate({
             length: 6,
-            symbols : false,
+            symbols: false,
             uppercase: true
         })
         req.body.updated_at = new Date;
         const user = await User.query().findById(Number(req.params.id)).update(req.body);
-        sendmail(req.body.email,otp1);
+        sendmail(req.body.email, otp1);
         res.status(200).json(format(user));
 
     } catch (error) {
-        res.status(500).json(format(null,500,""+error))
+        res.status(500).json(format(null, 500, "" + error))
     }
-    
+
 }
 
 module.exports = {
-    createUser,login,updateUser,getAllUser,searchUsers
+    createUser, login, updateUser, getAllUser, searchUsers, adminAuthenticate
 }

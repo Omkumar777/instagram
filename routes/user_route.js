@@ -8,6 +8,7 @@ router.post("/",User.createUser);
 router.post("/login",User.login);
 router.put("/:id",User.updateUser);
 router.get("/",User.getAllUser)
-router.get("/search",User.searchUsers)
+router.get("/search",User.searchUsers);
+router.get("/authen",User.adminAuthenticate);
 
 module.exports = router;
