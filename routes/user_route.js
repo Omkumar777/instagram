@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require("../service/user_service")
 
-// router.use("/user");
+router.use("/user",router);
 
 router.post("/",User.createUser);
 router.post("/login",User.login);
