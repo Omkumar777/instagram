@@ -3,7 +3,7 @@ const multer = require('multer');
 const { log } = require('console');
 
 
-
+let name;
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
     },
     filename:
      function (req, file, cb) {
-        cb(null, file.originalname)
+        cb(null, name + path.extname(file.originalname))
     }
 })
 
@@ -35,7 +35,13 @@ const upload = multer({
         cb("Error: File upload only supports the following filetypes: " + filetypes)
 
     }
-}).single("mypic")
+}).single("image")
 
+const imageUpload= async(req,res)=>{
+    name = req.body.user;
+    upload(req, res, function (err) {
+    if (err) return res.send(err);
+    res.send("Success. Image Uploaded!")
+})}
 
-module.exports = {upload};
+module.exports = {imageUpload};

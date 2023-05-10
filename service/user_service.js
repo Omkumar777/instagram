@@ -92,7 +92,7 @@ const adminAuthenticate = async (req, res,next) => {
             }
             const data = await User.query().findOne({ username: user.username })
 
-
+        
             if (data == null ) return res.status(404).json(format(null, 404, "Username is wrong "))
 
             const checkPass = await bcrypt.compare(user.password, data.password)
@@ -100,6 +100,34 @@ const adminAuthenticate = async (req, res,next) => {
             
             if(!(data.role =="admin")) return res.status(404).json(format(null, 404, "you are not admin "))
           
+            next();
+            
+        })
+    } catch (error) {
+        res.status(500).json(format(null, 500, error));
+    }
+}
+
+const userAuthenticate = async (req, res,next) => {
+    try {
+        const token = req.headers['authorization'];
+        if (!token) return res.status(401).json(format(null, 401, 'Not Authorized'));
+
+        jwt.verify(token, process.env.TOKEN, async (err, user) => {
+            if (err) {
+                return res.status(403).json(format(null, 403, err));
+            }
+            const data = await User.query().findOne({ username: user.username })
+
+        
+            if (data == null ) return res.status(404).json(format(null, 404, "Username is wrong "))
+
+            const checkPass = await bcrypt.compare(user.password, data.password)
+            if (!checkPass) return res.status(404).json(format(null, 404, "Password is wrong "))
+            
+            if(!(data.role =="user")) return res.status(404).json(format(null, 404, "you are not user "))
+            req.body.user = data.username;
+            
             next();
             
         })
@@ -145,5 +173,5 @@ const updateUser = async (req, res) => {
 }
 
 module.exports = {
-    createUser, login, updateUser, getAllUser, searchUsers, adminAuthenticate
+    createUser, login, updateUser, getAllUser, searchUsers, adminAuthenticate,userAuthenticate
 }

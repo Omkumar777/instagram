@@ -1,15 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const photo = require("../service/photoUpload")
+const User = require("../service/user_service")
 
 
 
-router.post("/", (req, res) => {
-    photo.upload(req, res, function (err) {
-        if (err) return res.send(err);
-        res.send("Success. Image Uploaded!")
-    })
-});
+router.post("/",User.userAuthenticate,photo.imageUpload);
+
 
 
 module.exports = router;
