@@ -5,8 +5,8 @@ const photo = require("./routes/image_route")
 
 app.use(express.json());
 
-// app.use("/user",user_routes);
-app.use("/",photo)
+app.use("/user",user_routes);
+app.use("/image",photo)
 
 
 

@@ -6,6 +6,7 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const otp = require('generate-password');
 const { default: knex } = require("knex");
+const { raw } = require("mysql");
 
 
 
@@ -100,6 +101,7 @@ const adminAuthenticate = async (req, res,next) => {
             if(!(data.role =="admin")) return res.status(404).json(format(null, 404, "you are not admin "))
           
             next();
+            
         })
     } catch (error) {
         res.status(500).json(format(null, 500, error));
@@ -116,7 +118,8 @@ const getAllUser = async (req, res) => {
 }
 const searchUsers = async (req, res) => {
     try {
-        const data = await User.query().where('username', req.body.search);
+        const data = await User.query().where("username",'like', "%"+req.body.search+"%").where("type",true).orWhere("name",'like', "%"+req.body.search+"%").where("type",true);
+        
         res.status(200).json(format(data))
     } catch (error) {
         res.status(500).json(format(null, 500, error))
