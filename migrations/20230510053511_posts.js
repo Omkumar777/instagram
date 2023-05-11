@@ -7,7 +7,7 @@ exports.up = function(knex) {
         table.increments("id").primary();
         table.string("name").notNullable();
         table.integer("user_id").unsigned().references("users.id");
-        table.bigInteger("likes");
+        table.bigInteger("likes").defaultTo(0);
         table.timestamp("created_at").defaultTo(knex.fn.now());
         table.timestamp("updated_at").defaultTo(knex.fn.now());
         })

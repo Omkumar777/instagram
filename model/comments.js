@@ -23,4 +23,4 @@ class Comments extends Model {
         }
     }
 }
-module.exports = Users;
+module.exports = Comments;

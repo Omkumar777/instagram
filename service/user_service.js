@@ -36,7 +36,7 @@ function sendmail(toMail, otp) {
 
 
 function format(data, status = 200, message = 'ok') {
-    return { status, message, data }
+    return { status,  message, data }
 }
 
 const createUser = async (req, res) => {
@@ -115,7 +115,7 @@ const userAuthenticate = async (req, res,next) => {
 
         jwt.verify(token, process.env.TOKEN, async (err, user) => {
             if (err) {
-                return res.status(403).json(format(null, 403, err));
+                return res.status(403).json(format(null, 403, " "+err));
             }
             const data = await User.query().findOne({ username: user.username })
 
@@ -126,8 +126,8 @@ const userAuthenticate = async (req, res,next) => {
             if (!checkPass) return res.status(404).json(format(null, 404, "Password is wrong "))
             
             if(!(data.role =="user")) return res.status(404).json(format(null, 404, "you are not user "))
-            req.body.user = data.username;
-            
+            req.body = data;
+
             next();
             
         })
@@ -135,6 +135,7 @@ const userAuthenticate = async (req, res,next) => {
         res.status(500).json(format(null, 500, error));
     }
 }
+
 
 const getAllUser = async (req, res) => {
     try {
@@ -171,6 +172,7 @@ const updateUser = async (req, res) => {
     }
 
 }
+
 
 module.exports = {
     createUser, login, updateUser, getAllUser, searchUsers, adminAuthenticate,userAuthenticate

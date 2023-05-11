@@ -1,5 +1,6 @@
 const { Model } = require('objection');
 const knex = require('../config/Config');
+const Users = require('./user');
 Model.knex(knex);
 
 
@@ -9,8 +10,7 @@ class Posts extends Model {
     }
     static get jsonSchema() {
         return {
-            type: 'object',
-            
+            type: 'object',          
             properties: {
                 id: { type: 'integer' },
                 name: { type: 'string' },
@@ -21,5 +21,16 @@ class Posts extends Model {
             }
         }
     }
+
+    static relationMappings = {
+        Users: {
+          relation: Model.BelongsToOneRelation,
+          modelClass: Users,
+          join: {
+            from: 'posts.user_id',
+            to: 'users.id'
+          }
+        }
+      };
 }
-module.exports = Users;
+module.exports = Posts;

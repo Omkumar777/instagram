@@ -1,6 +1,7 @@
 const { Model } = require('objection');
 const knex = require('../config/Config');
 Model.knex(knex);
+const Posts = require("./posts")
 
 // Users Class Service
 class Users extends Model {
@@ -24,5 +25,17 @@ class Users extends Model {
             }
         }
     }
+    static relationMappings = {
+        Posts: {
+          relation: Model.HasOneRelation,
+          modelClass: Posts,
+          join: {
+            from: 'users.id',
+            to: 'posts.user_id'
+          }
+        }
+      };
+
+
 }
 module.exports = Users;

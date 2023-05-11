@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const photo = require("../service/photoUpload")
+const photo = require("../service/post_service")
 const User = require("../service/user_service")
 
 
