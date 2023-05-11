@@ -1,8 +1,10 @@
 const path = require('path');
 const multer = require('multer');
-const { log } = require('console');
 const Posts=require("../model/posts")
 const Users =require("../model/user")
+const fs= require("fs");
+const Comments = require('../model/comments');
+
 
 
 
@@ -13,22 +15,23 @@ function format(data, status = 200, message = 'ok') {
 let name;
 let imageName;
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-
-
-        cb(null, 'uploads')
-    },
+    destination: 'uploads',
+   
     filename:
      function (req, file, cb) {
-        imageName = name + path.extname(file.originalname)
-        cb(null, name + path.extname(file.originalname))
+        imageName = name+new Date().toISOString().replace(/:/g , "-") + path.extname(file.originalname)
+        cb(null, name+new Date().toISOString().replace(/:/g , "-") + path.extname(file.originalname))
     }
 })
+
 
 let maxSize = 20 * 1000 * 1000
 
 const upload = multer({
     storage: storage,
+    limits :{
+        fileSize:maxSize
+    },
 
     fileFilter: function (req,file, cb) {
 
@@ -46,8 +49,10 @@ const upload = multer({
 }).single("image")
 
 const imageUpload= async (req,res)=>{
-    name = req.body.username;
-    let id = req.body.id;
+    name = req.user.username;
+    let id = req.user.id;
+    const totalposts = await Posts.query().where('user_id',id);
+    if(totalposts.length >= 10)return res.status(500).json(format(null,500,"User can upload only 10 images"))
     upload(req, res,  async(err)=> {
     if (err) return res.send(err);
     
@@ -56,28 +61,53 @@ const imageUpload= async (req,res)=>{
         user_id : id
     }
     const image = await Posts.query().insert(data)
-    res.send("Success. Image Uploaded!")
+    res.status(200).json(format("Success. Image Uploaded!"))
 })}
 
-const getposts = async (req,res)=>{
+const getuserposts = async (req,res)=>{
     try {
-        const posts = await Posts.query().select('posts.*','users.username','users.email').joinRelated(Users).innerJoin('users','posts.user_id','users.id')
-        res.status(200).json(posts);
+        const user = await Users.query().findById(req.params.id);
+        if (user.type == false)return res.status(403).json(format(null,403,"This user is a private user .You can't see his/her posts"))
+        const posts = await Posts.query().select('posts.*','users.username','users.email').joinRelated(Users).innerJoin('users','posts.user_id','users.id').where('user_id',req.params.id)
+        res.status(200).json(format(posts));
     } catch (error) {
-        res.status(500).json(""+error);
+        res.status(500).json(format(null,500,""+error));
     }
 }
 
-const addLike = async(req,res=>{
+const addLike = async (req,res)=>{
+    try {
+        const post = await Posts.query().findById(req.params.id);
+        post.likes +=1;
+        const like = await Posts.query().findById(req.params.id).update(post);
+        res.status(200).json(format('total likes '+ post.likes))
+    } catch (error) {
+        res.status(500).json(format(null,500,error))
+    }
+}
+
+
+const deletepost = async(req,res)=>{
     try {
         
+        const post =await Posts.query().findById(req.params.id);
+        if(req.user.id != post.user_id)return res.status(403).json(format(null,403,"You can't able to delete other's post"))
+        const comId = await Comments.query().findOne('post_id',req.params.id);
+        
+        const deltcomments = await Comments.query().delete().where('comment_id',comId.id)       
+       
+        const deltcomments1 = await Comments.query().delete().where('post_id',req.params.id)
+        
+        const deltpost =await Posts.query().deleteById(req.params.id);
+        fs.unlinkSync(path.dirname(__dirname)+"\\uploads\\"+post.name);
+        res.status(200).json(format(null,200,"Successfully Deleted"))
     } catch (error) {
-        res.status(500).
+        res.status(500).json(format(null,500,""+error))
     }
-})
-
+}
 
 module.exports = {
-    imageUpload,getposts
+
+    imageUpload,getuserposts,addLike,deletepost
 
 };

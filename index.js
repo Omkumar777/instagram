@@ -1,12 +1,14 @@
 const express = require("express");
 const app = express();
 const user_routes = require("./routes/user_route")
-const photo = require("./routes/image_route")
+const posts_route = require("./routes/post_route")
+const comment_route = require("./routes/comment_route")
 
 app.use(express.json());
 
 app.use("/user",user_routes);
-app.use("/image",photo)
+app.use("/post",posts_route);
+app.use("/comment",comment_route)
 
 
 

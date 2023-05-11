@@ -16,12 +16,10 @@ class Users extends Model {
                 id: { type: 'integer' },
                 name: { type: 'string' },
                 email:{type : 'string'},
-                username: { type: 'string' },
+                username: { type: 'string'},
                 password:{type:'string' },
                 phoneNumber:{type: 'number'},
                 type: {type : 'boolean'},
-
-
             }
         }
     }
