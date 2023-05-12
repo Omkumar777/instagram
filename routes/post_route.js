@@ -5,10 +5,11 @@ const User = require("../service/user_service")
 
 
 
-router.post("/",User.userAuthenticate,Posts.imageUpload);
-router.post("/addlike/:id",Posts.addLike)
+router.post("/upload",User.userAuthenticate,Posts.imageUpload);
+router.post("/addlike/:id",User.userAuthenticate,Posts.addLike)
 router.get("/getposts/:id",Posts.getuserposts)
-router.delete("/deltpost/:id",User.userAuthenticate,Posts.deletepost)
+router.delete("/deltpost/:id",User.userAuthenticate,Posts.deletepost);
+router.get("/getlikes/:id",Posts.postlikes);    
 
 
 module.exports = router;

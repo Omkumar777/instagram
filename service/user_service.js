@@ -11,6 +11,13 @@ const { raw } = require("mysql");
 let otpForVerify;
 let user={};
 
+function settime(){
+    setTimeout(()=>{
+        user = {},
+        otpForVerify = null
+    },60000)
+}
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -52,10 +59,12 @@ const createUser = async (req, res) => {
             length: 6,
             uppercase: false
         })
+        if(req.body.role)return res.status(404).json(format(null,404,"You can't make as admin"))
         otpForVerify = otp1;
         const pass = await bcrypt.hash(user.password, 7);
         user.password = pass;
         sendmail(user.email, otp1);
+        settime();
         res.status(200).json(format(null, 200, "Otp sent on the mail please verify"))
     } catch (error) {
         res.status(500).json(format(null, 500, "" + error))
@@ -141,7 +150,7 @@ const userAuthenticate = async (req, res, next) => {
 
             const checkPass = await bcrypt.compare(user.password, data.password)
             if (!checkPass) return res.status(404).json(format(null, 404, "Password is wrong "))
-
+            if(data.status == false)return res.status(404).json(format(null,404,"User account deleted"))
             if (!(data.role == "user")) return res.status(404).json(format(null, 404, "you are not user "))
             req.user = data;
             next();
@@ -153,11 +162,22 @@ const userAuthenticate = async (req, res, next) => {
 }
 
 
+const banUser = async (req,res)=>{
+    try {
+        user.status = false;
+        const user1 = await User.query().findById(req.params.id).update(user);
+        res.status(200).json(format(null,200,"User"+user.username + "banned"))
+    } catch (error) {
+        res.status(500).json(format(null,500,""+error))
+    }
+}
+
+
 
 
 const getAllUser = async (req, res) => {
     try {
-        const data = await User.query();
+        const data = await User.query().where('type',true).where('role','!=','admin');
         res.status(200).json(format(data))
     } catch (error) {
         res.status(500).json(format(null, 500, error))
@@ -165,11 +185,11 @@ const getAllUser = async (req, res) => {
 }
 const searchUsers = async (req, res) => {
     try {
-        const data = await User.query().where("username", 'like', "%" + req.body.search + "%").where("type", true).orWhere("name", 'like', "%" + req.body.search + "%").where("type", true);
+        const data = await User.query().select('name','username','email','phonenumber').where("username", 'like', "%" + req.body.search + "%").where("type", true).where('id',"!=",req.user.id).where('role',"!=","admin").orWhere("name", 'like', "%" + req.body.search + "%").where("type", true).where('id',"!=",req.user.id).where('role',"!=","admin");
 
         res.status(200).json(format(data))
     } catch (error) {
-        res.status(500).json(format(null, 500, error))
+        res.status(500).json(format(null, 500,""+ error))
     }
 }
 
@@ -197,7 +217,7 @@ const updateUser = async (req, res) => {
         if(req.body.role)return res.status(403).json(format(null,403,"not change to admin role"))
         req.body.updated_at = new Date;
         const user1 = await User.query().findById(Number(req.user.id)).update(req.body);
-        
+        settime();
         res.status(200).json(format(user1));
 
     } catch (error) {
@@ -205,6 +225,8 @@ const updateUser = async (req, res) => {
     }
 
 }
+
+
 const otpVerifyForUpdate = async (req, res) => {
 
     try {
@@ -221,5 +243,7 @@ const otpVerifyForUpdate = async (req, res) => {
 
 
 module.exports = {
-    createUser, login, updateUser, getAllUser, searchUsers, adminAuthenticate, userAuthenticate,otpVerifyForCreate,otpVerifyForUpdate
+    createUser, login, updateUser, getAllUser, searchUsers,
+     adminAuthenticate, userAuthenticate,otpVerifyForCreate,otpVerifyForUpdate,
+     banUser
 }

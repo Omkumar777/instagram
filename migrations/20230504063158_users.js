@@ -10,6 +10,7 @@ exports.up = function(knex) {
     table.string("password",100).notNullable();
     table.string("email",50).notNullable();
     table.bigInteger("phoneNumber",10);
+    table.boolean('status').defaultTo(true);
     table.boolean('type').defaultTo(true);
     table.string("role").defaultTo("user");
     table.timestamp("created_at").defaultTo(knex.fn.now());
