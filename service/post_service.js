@@ -126,7 +126,7 @@ const deletepost = async (req, res) => {
 
 const postlikes = async(req,res)=>{
     try {
-        const likes = await Likes.query().select('likes.post_id','users.username').joinRelated(Users).innerJoin('users','likes.user_id','users.id').where('likes.post_id',Number(req.params.id));
+        const likes = await Likes.query().select('users.username').joinRelated(Users).innerJoin('users','likes.user_id','users.id').where('likes.post_id',Number(req.params.id));
         res.status(200).json(format(likes))
     } catch (error) {
         res.status(500).json(format(null,500,""+ error));
