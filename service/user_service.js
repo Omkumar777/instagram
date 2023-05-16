@@ -81,7 +81,7 @@ const otpVerifyForCreate = async (req, res) => {
         user = {};
         res.status(200).json(format(data));
     } catch (error) {
-        res.status(500).json(format(null, 500, error));
+        res.status(500).json(format(null, 500,""+ error));
     }
 }
 
@@ -103,7 +103,7 @@ const login = async (req, res) => {
             res.status(404).json(format(null, 404, result.error.details))
         }
     } catch (error) {
-        res.status(500).json(format(null, 500, error));
+        res.status(500).json(format(null, 500,""+ error));
     }
 }
 
