@@ -5,7 +5,7 @@ Model.knex(knex);
 
 class Requested extends Model {
     static get tableName() {
-        return 'resquested';
+        return 'requested';
     }
     static get jsonSchema() {
         return {

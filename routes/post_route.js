@@ -10,6 +10,7 @@ router.post("/addlike/:id",User.userAuthenticate,Posts.addLike)
 router.get("/getposts/:id",Posts.getuserposts)
 router.delete("/deltpost/:id",User.userAuthenticate,Posts.deletepost);
 router.get("/getlikes/:id",Posts.postlikes);    
+router.get("/myposts",User.userAuthenticate,Posts.yourposts)
 
 
 module.exports = router;

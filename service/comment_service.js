@@ -1,5 +1,6 @@
 const Comments = require("../model/comments");
 const Posts = require("../model/posts");
+const Users = require("../model/user");
 
 
 
@@ -35,7 +36,15 @@ const replycomment = async(req,res)=>{
     }
 }
 
+const postcomments = async (req,res)=>{
+    try {
+        const comments = await Comments.query().select('users.username','comments.comments','comments.created_at').joinRelated(Users).leftJoin('users','comments.id','users.id').where({'post_id':req.params.id});
+        res.status(200).json(format(comments))
+    } catch (error) {
+        res.status(500).json(format(null,500,""+error))
+    }
+}
 
 module.exports= {
-    addcomment,replycomment
+    addcomment,replycomment,postcomments
 }

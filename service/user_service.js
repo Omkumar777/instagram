@@ -15,7 +15,7 @@ function settime(){
     setTimeout(()=>{
         user = {},
         otpForVerify = null
-    },60000)
+    },2 * 1000 * 60)
 }
 
 const transporter = nodemailer.createTransport({
@@ -52,6 +52,23 @@ function format(data, status = 200, message = 'ok') {
 
 const createUser = async (req, res) => {
     try {
+
+
+        function validate(data) {
+            const valid = joi.object({
+                name: joi.string().required(),
+                username: joi.string().required(),
+                password: joi.required(),
+                email:joi.string().email().required(),
+                phoneNumber : joi.number().required()
+            })
+            return valid.validate(data);
+        }
+        const result = validate(req.body);
+        if(result.error){return res.status(500).json(format(null,500,result.error.details))}
+        const check = await User.query().findOne('username',req.body.username);
+            
+        if(check)return res.status(403).json(format(null,403,'username not Available'))
         user = req.body;
         const otp1 = otp.generate({
             numbers: true,
@@ -65,7 +82,7 @@ const createUser = async (req, res) => {
         user.password = pass;
         sendmail(user.email, otp1);
         settime();
-        res.status(200).json(format(null, 200, "Otp sent on the mail please verify"))
+        res.status(200).json(format(null, 200, "Otp sent on the mail please verify , \n Valid only 2 mins"))
     } catch (error) {
         res.status(500).json(format(null, 500, "" + error))
     }
@@ -240,10 +257,30 @@ const otpVerifyForUpdate = async (req, res) => {
         res.status(500).json(format(null, 500,""+ error));
     }
 }
-
-
+const privateAccount =async(req,res)=>{
+    try {
+        data={
+            type : false
+        }
+        const user =await User.query().findById(req.user.id).update(data);
+        res.status(200).json(format(null,200,'Account changed to private'));
+    } catch (error) {
+        res.status(500).json(format(null,500,""+error))
+    }
+}
+const publicAccount =async(req,res)=>{
+    try {
+        data={
+            type : true
+        }
+        const user =await User.query().findById(req.user.id).update(data);
+        res.status(200).json(format(null,200,'Account changed to public'));
+    } catch (error) {
+        res.status(500).json(format(null,500,""+error))
+    }
+}
 module.exports = {
-    createUser, login, updateUser, getAllUser, searchUsers,
+    createUser, login, updateUser, getAllUser, searchUsers,privateAccount,publicAccount,
      adminAuthenticate, userAuthenticate,otpVerifyForCreate,otpVerifyForUpdate,
      banUser
 }
