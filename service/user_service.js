@@ -96,6 +96,7 @@ const otpVerifyForCreate = async (req, res) => {
 
         const data = await User.query().insert(user);
         user = {};
+        otpForVerify = null;
         res.status(200).json(format(data));
     } catch (error) {
         res.status(500).json(format(null, 500,""+ error));

@@ -5,6 +5,7 @@ const Users = require("../model/user")
 const fs = require("fs");
 const Comments = require('../model/comments');
 const Likes = require('../model/likes');
+const Follows = require('../model/follow');
 
 
 
@@ -76,9 +77,13 @@ const imageUpload = async (req, res) => {
 
 const getuserposts = async (req, res) => {
     try {
-        const user = await Users.query().findById(req.params.id);
-        if (user.type == false) return res.status(403).json(format(null, 403, "This user is a private user .You can't see his/her posts"))
-        const posts = await Posts.query().select('posts.*', 'users.username', 'users.email').joinRelated(Users).innerJoin('users', 'posts.user_id', 'users.id').where('user_id', req.params.id)
+        
+        const user = await Users.query().findById(Number(req.params.id));
+
+        const follow = await Follows.query().findOne({'user_id':Number(req.params.id),'follower_id':req.user.id})
+    
+        if (!follow && user.type == false  ) return res.status(403).json(format(null, 403, "This user is a private user .You can't see his/her posts"))
+        const posts = await Posts.query().select('posts.name','posts.photo','posts.likes', 'users.username', 'users.email').joinRelated(Users).innerJoin('users', 'posts.user_id', 'users.id').where('user_id',Number(req.params.id))
         res.status(200).json(format(posts));
     } catch (error) {
         res.status(500).json(format(null, 500, "" + error));
@@ -96,6 +101,10 @@ const yourposts = async (req, res) => {
 const addLike = async (req, res) => {
     try {
         const post = await Posts.query().findById(req.params.id);
+        
+        if(!post)return res.status(404).json(format(null,404,'not found'))
+        const follow = await Follows.query().findOne({'user_id':post.user_id,'follower_id':req.user.id})
+        if(!follow)return res.status(403).json(format(null,403,"can't like to private users posts"))
         const likes = await Likes.query().where('post_id', Number(req.params.id)).where('user_id', req.user.id);
 
         if (likes.length == 0) {
