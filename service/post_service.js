@@ -1,8 +1,9 @@
+const fs = require("fs");
 const path = require('path');
 const multer = require('multer');
+
 const Posts = require("../model/posts")
 const Users = require("../model/user")
-const fs = require("fs");
 const Comments = require('../model/comments');
 const Likes = require('../model/likes');
 const Follows = require('../model/follow');
@@ -68,6 +69,7 @@ const imageUpload = async (req, res) => {
             user_id: id
         }
         const image = await Posts.query().insert(data)
+        
         res.status(200).json(format("Success. Image Uploaded!"))
     })}
     catch(err){
