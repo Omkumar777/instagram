@@ -15,6 +15,7 @@ exports.up = function(knex) {
     table.string("role").defaultTo("user");
     table.bigInteger('followers').defaultTo(0);
     table.bigInteger('following').defaultTo(0);
+    table.string('verification').notNullable();
     table.timestamp("created_at").defaultTo(knex.fn.now());
     table.timestamp("updated_at").defaultTo(knex.fn.now());
     })

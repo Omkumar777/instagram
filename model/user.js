@@ -1,7 +1,7 @@
 const { Model } = require('objection');
 const knex = require('../config/Config');
 Model.knex(knex);
-const Posts = require("./posts")
+const Posts = require("./posts");
 
 // Users Class Service
 class Users extends Model {
@@ -20,6 +20,7 @@ class Users extends Model {
                 password:{type:'string' },
                 phoneNumber:{type: 'number'},
                 type: {type : 'boolean'},
+                verification : {type : 'string'}
             }
         }
     }
