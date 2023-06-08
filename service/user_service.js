@@ -1,6 +1,6 @@
 
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+
 const joi = require("joi");
 require('dotenv').config();
 const nodemailer = require('nodemailer');
@@ -24,7 +24,7 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'omkumar@xponential.digital',
-        pass: 'opvlzarbtphyoqbu'
+        pass: process.env.email_password
     }
 });
 function sendmail(toMail, otp) {
@@ -127,59 +127,9 @@ const login = async (req, res) => {
     }
 }
 
-const adminAuthenticate = async (req, res, next) => {
-    try {
-        const token = req.headers['authorization'];
-        if (!token) return res.status(401).json(format(null, 401, 'Not Authorized'));
-
-        jwt.verify(token, process.env.TOKEN, async (err, user) => {
-            if (err) {
-                return res.status(403).json(format(null, 403, err));
-            }
-            const data = await User.query().findOne({ username: user.username })
 
 
-            if (data == null) return res.status(404).json(format(null, 404, "Username is wrong "))
 
-            const checkPass = bcrypt.compareSync(user.password, data.password)
-            if (!checkPass) return res.status(404).json(format(null, 404, "Password is wrong "))
-
-            if (!(data.role == "admin")) return res.status(404).json(format(null, 404, "you are not admin "))
-            req.user = data;
-            next();
-
-        })
-    } catch (error) {
-        res.status(500).json(format(null, 500, error));
-    }
-}
-
-const userAuthenticate = async (req, res, next) => {
-    try {
-        const token = req.headers['authorization'];
-        if (!token) return res.status(401).json(format(null, 401, 'Not Authorized'));
-
-        jwt.verify(token, process.env.TOKEN, async (err, user) => {
-            if (err) {
-                return res.status(403).json(format(null, 403, " " + err));
-            }
-            const data = await User.query().findOne({ username: user.username })
-
-
-            if (data == null) return res.status(404).json(format(null, 404, "Username is wrong "))
-
-            const checkPass = bcrypt.compareSync(user.password, data.password)
-            if (!checkPass) return res.status(404).json(format(null, 404, "Password is wrong "))
-            if (data.status == false) return res.status(404).json(format(null, 404, "User account deleted"))
-            if (!(data.role == "user")) return res.status(404).json(format(null, 404, "you are not user "))
-            req.user = data;
-            next();
-
-        })
-    } catch (error) {
-        res.status(500).json(format(null, 500, error));
-    }
-}
 
 
 const banUser = async (req, res) => {
