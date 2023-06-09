@@ -46,7 +46,7 @@ const otpVerify = async (req, res) => {
             res.status(200).json(format(null, 200, 'Invalid OTP'));
         }
     } catch (error) {
-        res.status(500).json(format(null, 500, "" + error));
+        res.status(400).json(format(null, 400, "" + error));
     }
 }
 

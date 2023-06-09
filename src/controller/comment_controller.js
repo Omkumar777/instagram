@@ -18,7 +18,7 @@ const addComment = async (req, res) => {
         const comment = await CommentsService.createComment(req.body);
         res.status(200).json(format.format(comment))
     } catch (error) {
-        res.status(500).json(format.format(null, 500, "" + error))
+        res.status(400).json(format.format(null, 400, "" + error))
     }
 }
 const replyComment = async (req, res) => {
@@ -30,7 +30,7 @@ const replyComment = async (req, res) => {
         const comment = await CommentsService.createComment(req.body);
         res.status(200).json(format.format(comment))
     } catch (error) {
-        res.status(500).json(format.format(null, 500, "" + error))
+        res.status(400).json(format.format(null, 400, "" + error))
     }
 }
 
@@ -39,7 +39,7 @@ const postComments = async (req, res) => {
         const comments = await CommentsService.getCommentsByPosts(Number(req.params.id));
         res.status(200).json(format.format(comments))
     } catch (error) {
-        res.status(500).json(format.format(null, 500, "" + error))
+        res.status(400).json(format.format(null, 400, "" + error))
     }
 }
 

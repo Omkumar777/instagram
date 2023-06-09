@@ -1,11 +1,11 @@
 const { Model } = require('objection');
-const knex = require('../config/Config');
+const knex = require('../../config/Config');
 Model.knex(knex);
 
 
-class Requested extends Model {
+class Follows extends Model {
     static get tableName() {
-        return 'requested';
+        return 'follows';
     }
     static get jsonSchema() {
         return {
@@ -14,11 +14,11 @@ class Requested extends Model {
             properties: {
                 id: { type: 'integer' },
                 user_id:{type : 'integer'},
-                resquester_id:{type : 'integer'}
+                follower_id:{type : 'integer'}
                 
 
             }
         }
     }
 }
-module.exports = Requested;
+module.exports = Follows;

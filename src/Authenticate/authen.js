@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../model/user");
 const format = require("../helper/helper");
+const UserService = require("../services/user_services");
 
 
 
@@ -61,8 +62,19 @@ const adminAuthenticate = async (req, res, next) => {
         res.status(500).json(format.format(null, 500, error));
     }
 }
+const verifyUser =async(req,res,next)=>{
+    try {
+        const user = await UserService.findUserById(req.user.id);
+        if(user.verification == 'Verified'){
+            return next();
+        }
+        res.status(403).json(format.format(null,403,'User Not Verified'));
+    } catch (error) {
+        res.status(500).json(format.format(null,500,""+error));
+    }
+}
 
 
 module.exports = {
-    userAuthenticate,adminAuthenticate
+    userAuthenticate,adminAuthenticate,verifyUser
 }

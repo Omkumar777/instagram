@@ -8,33 +8,25 @@ const otp = require('generate-password');
 const { default: knex } = require("knex");
 const { raw } = require("mysql");
 const User = require("../model/user");
-const UserService = require("../services/user_controller");
-const sendmail = require("../helper/helper")
-// const format = require("./helper");
-
-let otpForVerify;
-let user = {};
-
-function settime() {
-    setTimeout(() => {
-        user = {},
-            otpForVerify = null
-    }, 2 * 1000 * 60)
-}
+const UserService = require("../services/user_services");
+const sendmail = require("../helper/helper");
+const format = require("../helper/helper");
 
 
 
 
-function format(data, status = 200, message = 'ok') {
-    return { status, message, data }
-}
+
+
+
+
+
 
 
 
 const createUser = async (req, res) => {
     try {
         const check = await UserService.findUser({ 'username': req.body.username });
-        if (check) return res.status(403).json(format(null, 403, 'username not Available,Please try another username'))
+        if (check) return res.status(403).json(format.format(null, 403, 'username not Available,Please try another username'))
 
         const otp1 = otp.generate({
             numbers: true,
@@ -43,7 +35,7 @@ const createUser = async (req, res) => {
             uppercase: false
         })
         req.body.verification = otp1;
-        if (req.body.role) return res.status(404).json(format(null, 404, "You can't make as admin"))
+        if (req.body.role) return res.status(404).json(format.format(null, 404, "You can't make as admin"))
 
         const pass = bcrypt.hashSync(req.body.password, 7);
         req.body.password = pass;
@@ -51,15 +43,16 @@ const createUser = async (req, res) => {
         const data = await UserService.createUser(req.body);
         sendmail.sendmail(req.body.email, otp1);
 
-        res.status(200).json(format(null, 200, "Otp sent on the mail please verify"))
+        res.status(200).json(format.format(null, 200, "Otp sent on the mail please verify"))
     } catch (error) {
-        res.status(500).json(format(null, 500, "" + error))
+        res.status(400).json(format.format(null, 400, "" + error))
     }
 }
 
 
 
 const login = async (req, res) => {
+   
     function validate(data) {
         const valid = joi.object({
             username: joi.string().required(),
@@ -69,15 +62,16 @@ const login = async (req, res) => {
     }
     try {
         const result = validate(req.body);
+      
         if (!result.error) {
             const access_token = jwt.sign(req.body, process.env.TOKEN);
-            res.json(format(access_token))
+            res.json(format.format(access_token))
         }
         else {
-            res.status(404).json(format(null, 404, result.error.details))
+            res.status(404).json(format.format(null, 404, result.error.details))
         }
     } catch (error) {
-        res.status(500).json(format(null, 500, "" + error));
+        res.status(400).json(format.format(null, 400, "" + error));
     }
 }
 
@@ -88,12 +82,13 @@ const login = async (req, res) => {
 
 const banUser = async (req, res) => {
     try {
+        const user = await UserService.findUserById(req.params.id);
         user.status = false;
 
         const user1 = await UserService.updateUserById(req.params.id,user);
         res.status(200).json(format(null, 200, "User banned"))
     } catch (error) {
-        res.status(500).json(format(null, 500, "" + error))
+        res.status(400).json(format.format(null, 400, "" + error))
     }
 }
 
@@ -103,18 +98,18 @@ const banUser = async (req, res) => {
 const getAllUser = async (req, res) => {
     try {
         const data = await UserService.getAllUser();
-        res.status(200).json(format(data))
+        res.status(200).json(format.format(data))
     } catch (error) {
-        res.status(500).json(format(null, 500, error))
+        res.status(400).json(format.format(null, 400, error))
     }
 }
 const searchUsers = async (req, res) => {
     try {
         const data = await UserService.searchUser(req.body.search,req.user.id);
 
-        res.status(200).json(format(data))
+        res.status(200).json(format.format(data))
     } catch (error) {
-        res.status(500).json(format(null, 500, "" + error))
+        res.status(400).json(format.format(null, 400, "" + error))
     }
 }
 
@@ -139,13 +134,13 @@ const updateUser = async (req, res) => {
             req.body.email = req.user.email;
         }
 
-        if (req.body.role) return res.status(403).json(format(null, 403, "not change to admin role"))
+        if (req.body.role) return res.status(403).json(format.format(null, 403, "not change to admin role"))
         req.body.updated_at = new Date;
         const user1 = await UserService.updateUserById(req.user.id,req.body);
-        res.status(200).json(format(user1));
+        res.status(200).json(format.format(user1));
 
     } catch (error) {
-        res.status(500).json(format(null, 500, "" + error))
+        res.status(400).json(format.format(null, 400, "" + error))
     }
 
 }
@@ -158,9 +153,9 @@ const privateAccount = async (req, res) => {
             type: false
         }
         const user = await UserService.updateUserById(req.user.id,data);
-        res.status(200).json(format(null, 200, 'Account changed to private'));
+        res.status(200).json(format.format(null, 200, 'Account changed to private'));
     } catch (error) {
-        res.status(500).json(format(null, 500, "" + error))
+        res.status(400).json(format.format(null, 400, "" + error))
     }
 }
 const publicAccount = async (req, res) => {
@@ -169,9 +164,9 @@ const publicAccount = async (req, res) => {
             type: true
         }
         const user = await  UserService.updateUserById(req.user.id,data);
-        res.status(200).json(format(null, 200, 'Account changed to public'));
+        res.status(200).json(format.format(null, 200, 'Account changed to public'));
     } catch (error) {
-        res.status(500).json(format(null, 500, "" + error))
+        res.status(400).json(format.format(null, 400, "" + error))
     }
 }
 module.exports = {
