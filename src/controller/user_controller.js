@@ -43,23 +43,12 @@ const createUser = async (req, res) => {
 
 const login = async (req, res) => {
    
-    function validate(data) {
-        const valid = joi.object({
-            username: joi.string().required(),
-            password: joi.required()
-        })
-        return valid.validate(data);
-    }
+  
     try {
-        const result = validate(req.body);
       
-        if (!result.error) {
             const access_token = jwt.sign(req.body, process.env.TOKEN);
             res.json(format.format(access_token))
-        }
-        else {
-            res.status(404).json(format.format(null, 404, result.error.details))
-        }
+       
     } catch (error) {
         res.status(400).json(format.format(null, 400, "" + error));
     }

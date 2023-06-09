@@ -51,6 +51,20 @@ function checkOtp(req, res, next) {
     next();
 };
 
+function loginValidate(req, res, next) {
+    const valid = joi.object({
+        username: joi.string().required(),
+        password: joi.required()
+    })
+
+    const validation = valid.validate(req.body);
+    if (validation.error) {
+        return res.status(400).json(format.format(validation.error.details))
+    }
+    next();
+};
+
+
 module.exports = {
-    validate, comment,replyComment,checkOtp
+    validate, comment,replyComment,checkOtp,loginValidate
 };
