@@ -13,16 +13,6 @@ const sendmail = require("../helper/helper");
 const format = require("../helper/helper");
 
 
-
-
-
-
-
-
-
-
-
-
 const createUser = async (req, res) => {
     try {
         const check = await UserService.findUser({ 'username': req.body.username });

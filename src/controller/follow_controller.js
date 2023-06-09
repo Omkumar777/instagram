@@ -5,13 +5,6 @@ const format = require("../helper/helper");
 const FollowService = require("../services/follow_services");
 const UserService = require("../services/user_services");
 
-
-
-
-
-
-
-
 const follow = async (req, res) => {
     try {
         if (req.user.id == req.params.id) return res.status(400).json(format.format(null, 400, 'You not follow you'))

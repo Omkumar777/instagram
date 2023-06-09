@@ -51,11 +51,6 @@ function checkOtp(req, res, next) {
     next();
 };
 
-
-
-
-
-
 module.exports = {
     validate, comment,replyComment,checkOtp
 };

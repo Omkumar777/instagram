@@ -4,14 +4,6 @@ const Users = require("../model/user");
 const format = require("../helper/helper");
 const CommentsService = require("../services/comment_services");
 
-
-
-
-
-
-
-
-
 const addComment = async (req, res) => {
     try {
         req.body.user_id = req.user.id;
